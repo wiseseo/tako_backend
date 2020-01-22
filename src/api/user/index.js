@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const Users = require('../../models/users');
 
 router.get('/', (req,res)=>{
     res.send('user page');
@@ -7,9 +8,9 @@ router.get('/', (req,res)=>{
 router.get('/:name', (req, res) => {
     console.log(req.body)
     res.send(`hello ${req.params.name}`);
-})
+});
 router.post('/signup', (req, res) => {
 
-})
+});
 
 module.exports = router;
