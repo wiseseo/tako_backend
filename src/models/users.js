@@ -5,8 +5,8 @@ const Users = new Schema({
   id : String,
   password : String,
   name : String,
-  likes : [Schema.Types.ObjectId],
-  stores : [Schema.Types.ObjectId]  
+  likes : {type: [Schema.Types.ObjectId], default:[]},
+  stores : {type: [Schema.Types.ObjectId], default:[]}  
 })
 
 module.exports = mongoose.model('Users', Users);
