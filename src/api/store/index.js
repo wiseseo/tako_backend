@@ -15,4 +15,20 @@ router.post('/', (req,res)=> {
     res.send('register store');
 });
 
+router.patch('/:storeId/menu', async (req,res) => {
+    const storeId = req.params.storeId;
+    const {menu, price, photo} = req.body;
+    //console.log(storeId);
+    //console.log(await Stores.findById(storeId));
+    const store = await Stores.findById(storeId);
+    store.items.push({
+        menu,
+        price,
+        photo
+    });
+    console.log(store);
+    Stores.findByIdAndUpdate(storeId,store);
+    res.send('..');
+})
 module.exports = router;
+
