@@ -11,7 +11,15 @@ router.get('/', (req,res)=>{
 router.post('/', (req,res)=> {
     console.log(req.body);
     const {title, type, address, time, description} = req.body;
-    Stores.create({title, type, location : { address }, time, description});
+    console.log(Stores.create({title, type, location : { address }, time, description}));
+    const promise = Stores.create({title, type, location : { address }, time, description});
+    promise.then((store)=>{
+       console.log(store);
+       const storeId = store._id;
+       console.log(storeId);
+       return storeId;
+       
+    })
     res.send('register store');
 });
 
