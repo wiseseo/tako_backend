@@ -17,7 +17,7 @@ router.post('/signup', (req, res) => {
     //console.log(req.body);
     //console.log(req.body.id);
     const { id , password, name } = req.body;
-    Users.create({id, password, name, likes:[], stores:[]});
+    Users.create({id, password, name});
     res.send('signup');
 });
 

@@ -10,7 +10,10 @@ const Stores = new Schema({
         longitude : Number 
     },
     time : String,
-    items : [], ///....?
+    items : {
+        type: Array,
+        default : []
+    },
     description : String
 })
 
