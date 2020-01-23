@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Stores = require('../../models/store');
+const Stores = require('../../models/stores');
 
 router.get('/', (req,res)=>{
     res.send('store page');
