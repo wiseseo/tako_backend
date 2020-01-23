@@ -14,8 +14,24 @@ router.get('/:name', (req, res) => {
 });
 
 router.post('/signup', (req, res) => {
-    console.log(req.body);
-    res.send('signup!');
+    //console.log(req.body);
+    //console.log(req.body.id);
+    const { id , password, name } = req.body;
+    Users.create({id, password, name, likes:[], stores:[]});
+    res.send('signup');
 });
+
+/*
+router.post('/login', (req,res)=>{
+    console.log(req.body);
+    res.send('login');
+});
+
+router.get('/logout', (req,res)=>{
+    //console.log(req.body);
+    res.send('logout');
+});
+*/
+
 
 module.exports = router;
