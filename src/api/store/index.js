@@ -36,9 +36,9 @@ router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta', async (req,re
     const latitudeDelta = parseFloat(req.params.latitudeDelta);
     const longitudeDelta = parseFloat(req.params.longitudeDelta);
     console.log(typeof userlatitude);
-    await Stores.find({$and : [{'location.latitude' : { $lte : userlatitude + latitudeDelta}} , {'location.longitude' : { $lte : userlongitude + longitudeDelta}} ]}).then((stores)=>{
+    await Stores.find({$and : [{'location.latitude' : { $lte : userlatitude + latitudeDelta}} , {'location.latitude' : { $gte : userlatitude - latitudeDelta}}, {'location.longitude' : { $lte : userlongitude + longitudeDelta}} , {'location.longitude' : { $gte : userlongitude - longitudeDelta}} ]}).then((stores)=>{
         res.send(stores);
-    })
-})
+    });    
+});
 module.exports = router;
 
