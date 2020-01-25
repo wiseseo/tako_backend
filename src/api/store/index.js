@@ -13,7 +13,7 @@ router.post('/', (req,res)=> {
     console.log(req.body);
     const {title, type, address, time, description} = req.body;
     //address에서 latitude, longtitude 로 변환 필요
-    const promise = Stores.create({title, type, location : { address }, time, description});
+    const promise = Stores.create({title, type, location : { address }, time, description});;
     promise.then((store)=>{
        const storeId = store._id;
        return storeId;
