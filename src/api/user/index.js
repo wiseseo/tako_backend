@@ -21,6 +21,22 @@ router.post('/signup', (req, res) => {
     res.send('signup');
 });
 
+router.get('/:userId/like', async (req, res)=>{
+    const userId = req.params.userId;
+    await Users.findOne({id:userId}).then((user)=>{
+        const userLike = user.likes;
+        res.send(userLike);
+    })
+});
+
+router.post('/:userId/like', async (req, res)=>{
+    const {storeId} = req.body;
+    const userId = req.params.userId;
+    await Users.findOneAndUpdate({id:userId},{$push : {likes : storeId}});
+    res.send('좋아하는 가게 등록!');
+})
+
+
 /*
 router.post('/login', (req,res)=>{
     console.log(req.body);
