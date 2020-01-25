@@ -29,6 +29,16 @@ router.patch('/:storeId/menu', async (req,res) => {
     res.send('register menu');
 });
 
-
+//가게 거리에 따라서 보여주기
+router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta', async (req,res)=>{
+    const userlatitude = parseFloat(req.params.latitude);
+    const userlongitude = parseFloat(req.params.longitude);
+    const latitudeDelta = parseFloat(req.params.latitudeDelta);
+    const longitudeDelta = parseFloat(req.params.longitudeDelta);
+    console.log(typeof userlatitude);
+    await Stores.find({$and : [{'location.latitude' : { $lte : userlatitude + latitudeDelta}} , {'location.longitude' : { $lte : userlongitude + longitudeDelta}} ]}).then((stores)=>{
+        res.send(stores);
+    })
+})
 module.exports = router;
 
