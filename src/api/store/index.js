@@ -12,11 +12,10 @@ router.get('/', (req,res)=>{
 router.post('/', (req,res)=> {
     console.log(req.body);
     const {title, type, address, time, description} = req.body;
+    //address에서 latitude, longtitude 로 변환 필요
     const promise = Stores.create({title, type, location : { address }, time, description});
     promise.then((store)=>{
-       //console.log(store);
        const storeId = store._id;
-       //console.log(storeId);
        return storeId;
        
     })
@@ -26,21 +25,9 @@ router.post('/', (req,res)=> {
 router.patch('/:storeId/menu', async (req,res) => {
     const storeId = req.params.storeId;
     const {menu, price, photo, userId} = req.body;
-    //console.log(storeId);
-    //console.log(await Stores.findById(storeId));
-    const store = await Stores.findById(storeId);
-    store.items.push({
-        menu,
-        price,
-        photo
-    });
-    //console.log(store);
-    await Stores.findByIdAndUpdate(storeId,store);
+    await Stores.findByIdAndUpdate(storeId,{$push : {items : {menu, price, photo}}});
     //내가게등록까지
-    const user = await Users.findOne({id : userId});
-    user.stores.push(store._id);
-    //console.log(user);
-    await Users.findOneAndUpdate({id:userId},user);
+    await Users.findOneAndUpdate({id:userId},{$push:{stores: storeId}});
     res.send('register menu');
 });
 
