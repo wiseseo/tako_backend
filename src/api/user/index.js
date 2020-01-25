@@ -29,12 +29,21 @@ router.get('/:userId/like', async (req, res)=>{
     })
 });
 
+
 router.post('/:userId/like', async (req, res)=>{
     const {storeId} = req.body;
     const userId = req.params.userId;
     await Users.findOneAndUpdate({id:userId},{$push : {likes : storeId}});
     res.send('좋아하는 가게 등록!');
 })
+
+router.get('/:userId/store', async (req, res)=>{
+    const userId = req.params.userId;
+    await Users.findOne({id:userId}).then((user)=>{
+        const userStore = user.stores;
+        res.send(userStore);
+    })
+});
 
 
 /*
