@@ -83,5 +83,31 @@ router.patch('/:storeId/item/:itemIndex', async (req,res)=>{
     })
 });
 
+//가게 삭제
+router.delete('/:storeId', async (req,res)=> {
+    const storeId = req.params.storeId;
+    const { userId } = req.body;
+    
+    await Stores.findByIdAndDelete(storeId).then(()=>{res.send('가게삭제')}).catch((err)=>{console.log(err)});
+    //내가게에서도 삭제
+    await Users.findOneAndUpdate({id : userId}, {$pull :{stores : storeId}}).then(()=>{res.send('내가게 삭제')}).catch((err)=>{console.log(err)});
+});
+
+//메뉴 삭제
+router.delete('/:storeId/item/:itemIndex', async (req,res)=> {
+    const storeId = req.params.storeId;
+    const itemIndex = parseInt(req.params.itemIndex);
+    //const { userId } = req.body;
+    
+    await Stores.findById(storeId).then(async (store)=>{
+        store.items.splice(itemIndex,1);
+        console.log(store.items);
+        await Stores.findByIdAndUpdate(storeId, {$set : {items : store.items}});
+        res.send('메뉴 수정');
+    }).catch((err)=>{
+        console.log(err);
+    })
+})
+
 module.exports = router;
 
