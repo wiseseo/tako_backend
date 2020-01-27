@@ -67,6 +67,16 @@ router.delete('/:userId/like/:storeId', async (req, res)=>{
     await Users.findOneAndUpdate({id:userId},{$pull : {likes : storeId}}).then(()=>{}).catch((e)=>{console.log(e)});
     res.send('좋아하는가게삭제');
 });
+
+//회원탈퇴
+router.delete('/:userId', async(req,res)=>{
+    const userId = req.params.userId;
+    await Users.findOneAndDelete({id:userId}).then(()=>{
+        res.send('회원탈퇴');
+    }).catch((err)=>{
+        console.log(err);
+    })
+})
 /*
 router.post('/login', (req,res)=>{
     console.log(req.body);
