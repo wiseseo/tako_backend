@@ -56,6 +56,32 @@ router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta/:type', async (
     });    
 });
 
+//가게 수정
+router.put('/:storeId', async (req, res)=>{
+    const {title, type, address, time, description } = req.body;
+    const storeId = req.params.storeId;
+
+    await Stores.findByIdAndUpdate(storeId, {$set: {title, type, address, time, description}}, {returnNewDocument : true}).then((store)=>{
+        console.log(store);
+        res.send('가게 수정');
+    }).catch((err)=>{
+        console.log(err);
+    })
+});
+
+//메뉴 수정
+router.patch('/:storeId/item/:itemIndex', async (req,res)=>{
+    const storeId = req.params.storeId;
+    const itemIndex = parseInt(req.params.itemIndex);
+    const { menu, price, photo } = req.body;
+
+    await Stores.findById(storeId).then(async (store)=>{
+        store.items[itemIndex] = { menu ,price, photo};
+        console.log(store.items);
+        await Stores.findByIdAndUpdate(storeId, {$set : {items : store.items}});
+        res.send('메뉴 수정');
+    })
+});
 
 module.exports = router;
 
