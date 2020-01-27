@@ -35,9 +35,24 @@ router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta', async (req,re
     const userlongitude = parseFloat(req.params.longitude);
     const latitudeDelta = parseFloat(req.params.latitudeDelta);
     const longitudeDelta = parseFloat(req.params.longitudeDelta);
-    console.log(typeof userlatitude);
+    //console.log(typeof userlatitude);
     await Stores.find({$and : [{'location.latitude' : { $lte : userlatitude + latitudeDelta}} , {'location.latitude' : { $gte : userlatitude - latitudeDelta}}, {'location.longitude' : { $lte : userlongitude + longitudeDelta}} , {'location.longitude' : { $gte : userlongitude - longitudeDelta}} ]}).then((stores)=>{
         res.send(stores);
+    });    
+});
+
+//가게 거리+type 따라서 보여주기
+router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta/:type', async (req,res)=>{
+    const userlatitude = parseFloat(req.params.latitude);
+    const userlongitude = parseFloat(req.params.longitude);
+    const latitudeDelta = parseFloat(req.params.latitudeDelta);
+    const longitudeDelta = parseFloat(req.params.longitudeDelta);
+    const type = req.params.type;
+
+    console.log(typeof type, type);
+    await Stores.find({$and : [{'location.latitude' : { $lte : userlatitude + latitudeDelta}} , {'location.latitude' : { $gte : userlatitude - latitudeDelta}}, {'location.longitude' : { $lte : userlongitude + longitudeDelta}} , {'location.longitude' : { $gte : userlongitude - longitudeDelta}} ]}).then((stores)=>{
+        const filteredStore = stores.filter(store => store.type.includes(type));
+        res.send(filteredStore);
     });    
 });
 module.exports = router;
