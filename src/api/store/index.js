@@ -55,5 +55,7 @@ router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta/:type', async (
         res.send(filteredStore);
     });    
 });
+
+
 module.exports = router;
 
