@@ -91,6 +91,12 @@ router.delete('/:storeId', async (req,res)=> {
     await Stores.findByIdAndDelete(storeId).then(()=>{res.send('가게삭제')}).catch((err)=>{console.log(err)});
     //내가게에서도 삭제
     await Users.findOneAndUpdate({id : userId}, {$pull :{stores : storeId}}).then(()=>{res.send('내가게 삭제')}).catch((err)=>{console.log(err)});
+
+    //내가좋아하는가게 - 사용자 삭제
+    await Users.updateMany({likes : {$in : storeId}},{$pull : {likes : storeId }}).then((store)=>{
+        console.log(store);
+        res.send('내가좋아하는가게 삭제');
+    })
 });
 
 //메뉴 삭제

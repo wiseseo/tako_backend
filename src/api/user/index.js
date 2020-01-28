@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Users = require('../../models/users');
+const Stores = require('../../models/stores');
 
 router.use(express.json());
 
@@ -71,8 +72,24 @@ router.delete('/:userId/like/:storeId', async (req, res)=>{
 //회원탈퇴
 router.delete('/:userId', async(req,res)=>{
     const userId = req.params.userId;
-    await Users.findOneAndDelete({id:userId}).then(()=>{
-        res.send('회원탈퇴');
+    await Users.findOne({id:userId}).then( async (user)=>{
+        //res.send('회원탈퇴');
+        const userStores = user.stores;
+        console.log(userStores);
+        userStores.forEach(async (storeId)=>{
+            await Stores.findByIdAndDelete(storeId).then(()=>{console.log('가게삭제')}).catch((err)=>{console.log(err)});
+
+            await Users.updateMany({likes : {$in : storeId}},{$pull : {likes : storeId }}).then(()=>{
+                //console.log(store);
+                console.log('내가좋아하는가게 삭제');
+            })
+            console.log(storeId);
+
+        });
+
+        await Users.deleteOne({id:userId}).then(()=>{
+            res.send('유저 삭제');
+        })
     }).catch((err)=>{
         console.log(err);
     })
