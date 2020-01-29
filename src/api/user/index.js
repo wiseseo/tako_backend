@@ -11,20 +11,16 @@ router.get('/', (req,res)=>{
 });
 
 router.post('/signup', (req, res) => {
-    //console.log(req.body);
-    //console.log(req.body.id);
     const { id , password, name } = req.body;
     crypto.pbkdf2(password, 'iloveeunwoo', 108236, 64, 'sha256', (err, key)=>{
-        key = key.toString('base64');
-        //console.log(key);
-        Users.create({id, password : key, name});
+        Users.create({id, password : key.toString('base64'), name});
         res.send('signup');
     });
 });
 
-router.get('/:userId/like', async (req, res)=>{
+router.get('/:userId/like', (req, res)=>{
     const userId = req.params.userId;
-    await Users.findOne({id:userId}).then((user)=>{
+    Users.findOne({id:userId}).then((user)=>{
         const userLike = user.likes;
         res.send(userLike);
     })
@@ -39,21 +35,19 @@ router.post('/:userId/like', async (req, res)=>{
 })
 
 //내가게보여주기
-router.get('/:userId/store', async (req, res)=>{
+router.get('/:userId/store', (req, res)=>{
     const userId = req.params.userId;
-    await Users.findOne({id:userId}).then((user)=>{
+    Users.findOne({id:userId}).then((user)=>{
         const userStore = user.stores;
         res.send(userStore);
     })
 });
 
 //내정보수정
-router.put('/:userId', async (req, res)=>{
+router.put('/:userId', (req, res)=>{
     const { password, name } = req.body;
     const userId = req.params.userId;
-    console.log(password);
-    console.log(name);
-    await Users.findOneAndUpdate({id : userId},{$set : {password, name}},{returnNewDocument : true}).then((user)=>{
+    Users.findOneAndUpdate({id : userId},{$set : {password, name}},{returnNewDocument : true}).then((user)=>{
         console.log(user);
         res.send('개인정보수정');
     }).catch((err)=>{
@@ -62,20 +56,21 @@ router.put('/:userId', async (req, res)=>{
 });
 
 //내가좋아하는가게수정(삭제)
-router.delete('/:userId/like/:storeId', async (req, res)=>{
+router.delete('/:userId/like/:storeId', (req, res)=>{
     const userId = req.params.userId;
     const storeId = req.params.storeId;
-    await Users.findOneAndUpdate({id:userId},{$pull : {likes : storeId}}).then(()=>{}).catch((e)=>{console.log(e)});
+    Users.findOneAndUpdate({id:userId},{$pull : {likes : storeId}}).then(()=>{}).catch((e)=>{console.log(e)});
     res.send('좋아하는가게삭제');
 });
 
 //회원탈퇴
-router.delete('/:userId', async(req,res)=>{
+router.delete('/:userId', (req,res)=>{
     const userId = req.params.userId;
-    await Users.findOne({id:userId}).then( async (user)=>{
+    Users.findOne({id:userId}).then( (user)=>{
         //res.send('회원탈퇴');
         const userStores = user.stores;
         console.log(userStores);
+        /*
         userStores.forEach(async (storeId)=>{
             await Stores.findByIdAndDelete(storeId).then(()=>{console.log('가게삭제')}).catch((err)=>{console.log(err)});
 
@@ -86,24 +81,43 @@ router.delete('/:userId', async(req,res)=>{
             console.log(storeId);
 
         });
+        */
 
-        await Users.deleteOne({id:userId}).then(()=>{
+        const resStore = userStores.map((storeId)=>{
+            return Stores.findByIdAndDelete(storeId);
+        });
+
+        Promise.all(resStore).then(() => console.log('내가게 삭제끝')).catch(err => console.log(err.message));
+        
+        const resUser = userStores.map((storeId)=>{
+            return  Users.updateMany({likes : {$in : storeId}},{$pull : {likes : storeId }});
+        })
+        
+        Promise.all(resUser).then(() => console.log('좋아하는 가게 삭제 끝')).catch(err => console.log(err.message));
+
+        Users.deleteOne({id:userId}).then(()=>{
             res.send('유저 삭제');
         })
+
     }).catch((err)=>{
         console.log(err);
     })
 })
 
 router.post('/login', (req,res)=>{
-    console.log(req.body);
+    //console.log(req.body);
     const { userId, password } = req.body;
-    crypto.pbkdf2(password, 'iloveeunwoo', 108236, 64, 'sha256', async (err, key)=>{
-        key = key.toString('base64');
-        await Users.findOne({id: userId, password : key}).then(()=>{
-            res.send('login');
+
+    crypto.pbkdf2(password, 'iloveeunwoo', 108236, 64, 'sha256', (err, key)=>{
+        Users.findOne({$and : [{id:userId}, {password:key.toString('base64')}]}).then((result)=>{
+            if(result){
+                res.send('login');
+            }
+            else {
+                res.send('fail');
+            }
         }).catch((err)=>{
-            console.log(`로그인 실패 : ${err}`);
+            console.log(err);
         })
     });
 

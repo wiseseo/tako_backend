@@ -30,19 +30,19 @@ router.patch('/:storeId/menu', async (req,res) => {
 });
 
 //가게 거리에 따라서 보여주기
-router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta', async (req,res)=>{
+router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta', (req,res)=>{
     const userlatitude = parseFloat(req.params.latitude);
     const userlongitude = parseFloat(req.params.longitude);
     const latitudeDelta = parseFloat(req.params.latitudeDelta);
     const longitudeDelta = parseFloat(req.params.longitudeDelta);
     //console.log(typeof userlatitude);
-    await Stores.find({$and : [{'location.latitude' : { $lte : userlatitude + latitudeDelta}} , {'location.latitude' : { $gte : userlatitude - latitudeDelta}}, {'location.longitude' : { $lte : userlongitude + longitudeDelta}} , {'location.longitude' : { $gte : userlongitude - longitudeDelta}} ]}).then((stores)=>{
+    Stores.find({$and : [{'location.latitude' : { $lte : userlatitude + latitudeDelta}} , {'location.latitude' : { $gte : userlatitude - latitudeDelta}}, {'location.longitude' : { $lte : userlongitude + longitudeDelta}} , {'location.longitude' : { $gte : userlongitude - longitudeDelta}} ]}).then((stores)=>{
         res.send(stores);
     });    
 });
 
 //가게 거리+type 따라서 보여주기
-router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta/:type', async (req,res)=>{
+router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta/:type', (req,res)=>{
     const userlatitude = parseFloat(req.params.latitude);
     const userlongitude = parseFloat(req.params.longitude);
     const latitudeDelta = parseFloat(req.params.latitudeDelta);
@@ -50,18 +50,18 @@ router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta/:type', async (
     const type = req.params.type;
 
     console.log(typeof type, type);
-    await Stores.find({$and : [{'location.latitude' : { $lte : userlatitude + latitudeDelta}} , {'location.latitude' : { $gte : userlatitude - latitudeDelta}}, {'location.longitude' : { $lte : userlongitude + longitudeDelta}} , {'location.longitude' : { $gte : userlongitude - longitudeDelta}} ]}).then((stores)=>{
+    Stores.find({$and : [{'location.latitude' : { $lte : userlatitude + latitudeDelta}} , {'location.latitude' : { $gte : userlatitude - latitudeDelta}}, {'location.longitude' : { $lte : userlongitude + longitudeDelta}} , {'location.longitude' : { $gte : userlongitude - longitudeDelta}} ]}).then((stores)=>{
         const filteredStore = stores.filter(store => store.type.includes(type));
         res.send(filteredStore);
     });    
 });
 
 //가게 수정
-router.put('/:storeId', async (req, res)=>{
+router.put('/:storeId', (req, res)=>{
     const {title, type, address, time, description } = req.body;
     const storeId = req.params.storeId;
 
-    await Stores.findByIdAndUpdate(storeId, {$set: {title, type, address, time, description}}, {returnNewDocument : true}).then((store)=>{
+    Stores.findByIdAndUpdate(storeId, {$set: {title, type, address, time, description}}, {returnNewDocument : true}).then((store)=>{
         console.log(store);
         res.send('가게 수정');
     }).catch((err)=>{
@@ -70,12 +70,12 @@ router.put('/:storeId', async (req, res)=>{
 });
 
 //메뉴 수정
-router.patch('/:storeId/item/:itemIndex', async (req,res)=>{
+router.patch('/:storeId/item/:itemIndex', (req,res)=>{
     const storeId = req.params.storeId;
     const itemIndex = parseInt(req.params.itemIndex);
     const { menu, price, photo } = req.body;
 
-    await Stores.findById(storeId).then(async (store)=>{
+    Stores.findById(storeId).then(async (store)=>{
         store.items[itemIndex] = { menu ,price, photo};
         console.log(store.items);
         await Stores.findByIdAndUpdate(storeId, {$set : {items : store.items}});
@@ -84,28 +84,29 @@ router.patch('/:storeId/item/:itemIndex', async (req,res)=>{
 });
 
 //가게 삭제
-router.delete('/:storeId', async (req,res)=> {
+router.delete('/:storeId', (req,res)=> {
     const storeId = req.params.storeId;
     const { userId } = req.body;
     
-    await Stores.findByIdAndDelete(storeId).then(()=>{res.send('가게삭제')}).catch((err)=>{console.log(err)});
+    Stores.findByIdAndDelete(storeId).then(()=>{res.send('가게삭제')}).catch((err)=>{console.log(err)});
+
     //내가게에서도 삭제
-    await Users.findOneAndUpdate({id : userId}, {$pull :{stores : storeId}}).then(()=>{res.send('내가게 삭제')}).catch((err)=>{console.log(err)});
+    Users.findOneAndUpdate({id : userId}, {$pull :{stores : storeId}}).then(()=>{res.send('내가게 삭제')}).catch((err)=>{console.log(err)});
 
     //내가좋아하는가게 - 사용자 삭제
-    await Users.updateMany({likes : {$in : storeId}},{$pull : {likes : storeId }}).then((store)=>{
+    Users.updateMany({likes : {$in : storeId}},{$pull : {likes : storeId }}).then((store)=>{
         console.log(store);
         res.send('내가좋아하는가게 삭제');
     })
 });
 
 //메뉴 삭제
-router.delete('/:storeId/item/:itemIndex', async (req,res)=> {
+router.delete('/:storeId/item/:itemIndex', (req,res)=> {
     const storeId = req.params.storeId;
     const itemIndex = parseInt(req.params.itemIndex);
     //const { userId } = req.body;
     
-    await Stores.findById(storeId).then(async (store)=>{
+    Stores.findById(storeId).then(async (store)=>{
         store.items.splice(itemIndex,1);
         console.log(store.items);
         await Stores.findByIdAndUpdate(storeId, {$set : {items : store.items}});
