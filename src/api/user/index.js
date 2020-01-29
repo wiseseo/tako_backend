@@ -100,9 +100,7 @@ router.post('/login', (req,res)=>{
     const { userId, password } = req.body;
     crypto.pbkdf2(password, 'iloveeunwoo', 108236, 64, 'sha256', async (err, key)=>{
         key = key.toString('base64');
-        //console.log(key);
         await Users.findOne({id: userId, password : key}).then(()=>{
-            //console.log(user);
             res.send('login');
         }).catch((err)=>{
             console.log(`로그인 실패 : ${err}`);
