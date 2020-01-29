@@ -1,4 +1,5 @@
 const express = require('express');
+const crypto = require('crypto');
 const router = express.Router();
 const Users = require('../../models/users');
 const Stores = require('../../models/stores');
@@ -9,17 +10,16 @@ router.get('/', (req,res)=>{
     res.send('user page');
 });
 
-router.get('/:name', (req, res) => {
-    console.log(req.body)
-    res.send(`hello ${req.params.name}`);
-});
-
 router.post('/signup', (req, res) => {
     //console.log(req.body);
     //console.log(req.body.id);
     const { id , password, name } = req.body;
-    Users.create({id, password, name});
-    res.send('signup');
+    crypto.pbkdf2(password, 'iloveeunwoo', 108236, 64, 'sha256', (err, key)=>{
+        key = key.toString('base64');
+        //console.log(key);
+        Users.create({id, password : key, name});
+        res.send('signup');
+    });
 });
 
 router.get('/:userId/like', async (req, res)=>{
@@ -94,12 +94,24 @@ router.delete('/:userId', async(req,res)=>{
         console.log(err);
     })
 })
-/*
+
 router.post('/login', (req,res)=>{
     console.log(req.body);
-    res.send('login');
+    const { userId, password } = req.body;
+    crypto.pbkdf2(password, 'iloveeunwoo', 108236, 64, 'sha256', async (err, key)=>{
+        key = key.toString('base64');
+        //console.log(key);
+        await Users.findOne({id: userId, password : key}).then(()=>{
+            //console.log(user);
+            res.send('login');
+        }).catch((err)=>{
+            console.log(`로그인 실패 : ${err}`);
+        })
+    });
+
 });
 
+/*
 router.get('/logout', (req,res)=>{
     //console.log(req.body);
     res.send('logout');
