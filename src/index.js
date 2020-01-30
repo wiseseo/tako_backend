@@ -4,7 +4,8 @@ const mongoose = require('mongoose');
 
 const {
     PORT : port = 3000,
-    MONGO_URI : mongoURI
+    MONGO_URI : mongoURI,
+    SECRET : secret
 } = process.env;
 
 mongoose.Promise = global.Promise;
@@ -17,6 +18,7 @@ const app = express();
 
 app.use('/api', require('./api'));
 
+app.set('jwt-secret', secret);
 
 app.get('/', (req, res)=> {
     res.send('성공');
