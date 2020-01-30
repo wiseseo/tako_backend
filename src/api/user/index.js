@@ -9,37 +9,36 @@ router.get('/', (req,res)=>{
     res.send('user page');
 });
 
-router.get('/:userId/like', (req, res)=>{
-    const userId = req.params.userId;
-    Users.findOne({id:userId}).then((user)=>{
+router.get('/like', (req, res)=>{
+    const id = req.decoded.id;
+    Users.findOne({id}).then((user)=>{
         const userLike = user.likes;
         res.send(userLike);
     })
 });
 
 //내가좋아하는가게등록
-router.post('/:userId/like', async (req, res)=>{
+router.post('/like', async (req, res)=>{
     const {storeId} = req.body;
-    const userId = req.params.userId;
-    await Users.findOneAndUpdate({id:userId},{$push : {likes : storeId}});
+    const id = req.decoded.id;
+    await Users.findOneAndUpdate({id},{$push : {likes : storeId}});
     res.send('좋아하는 가게 등록!');
 })
 
 //내가게보여주기
-router.get('/:userId/store', (req, res)=>{
-    const userId = req.params.userId;
-    Users.findOne({id:userId}).then((user)=>{
+router.get('/store', (req, res)=>{
+    const id = req.decoded.id;
+    Users.findOne({id}).then((user)=>{
         const userStore = user.stores;
         res.send(userStore);
     })
 });
 
 //내정보수정
-router.put('/:userId', (req, res)=>{
+router.put('/', (req, res)=>{
     const { password, name } = req.body;
-    const userId = req.params.userId;
-    Users.findOneAndUpdate({id : userId},{$set : {password, name}},{returnNewDocument : true}).then((user)=>{
-        console.log(user);
+    const id = req.decoded.id;
+    Users.findOneAndUpdate({id},{$set : {password, name}},{returnNewDocument : true}).then((user)=>{
         res.send('개인정보수정');
     }).catch((err)=>{
         console.log(err);
@@ -47,33 +46,20 @@ router.put('/:userId', (req, res)=>{
 });
 
 //내가좋아하는가게수정(삭제)
-router.delete('/:userId/like/:storeId', (req, res)=>{
-    const userId = req.params.userId;
+router.delete('/like/:storeId', (req, res)=>{
+    const id = req.decoded.id;
     const storeId = req.params.storeId;
-    Users.findOneAndUpdate({id:userId},{$pull : {likes : storeId}}).then(()=>{}).catch((e)=>{console.log(e)});
+    Users.findOneAndUpdate({id},{$pull : {likes : storeId}}).then(()=>{}).catch((e)=>{console.log(e)});
     res.send('좋아하는가게삭제');
 });
 
 //회원탈퇴
-router.delete('/:userId', (req,res)=>{
-    const userId = req.params.userId;
-    Users.findOne({id:userId}).then( (user)=>{
-        //res.send('회원탈퇴');
+router.delete('/', (req,res)=>{
+    const id = req.decoded.id;
+    Users.findOne({id}).then( (user)=>{
+        
         const userStores = user.stores;
-        console.log(userStores);
-        /*
-        userStores.forEach(async (storeId)=>{
-            await Stores.findByIdAndDelete(storeId).then(()=>{console.log('가게삭제')}).catch((err)=>{console.log(err)});
-
-            await Users.updateMany({likes : {$in : storeId}},{$pull : {likes : storeId }}).then(()=>{
-                //console.log(store);
-                console.log('내가좋아하는가게 삭제');
-            })
-            console.log(storeId);
-
-        });
-        */
-
+        //바꿔야함!!!!!!!!!!!!!!!!!!!!!!모든작업이 끝나야 res.send를 호출해야해요
         const resStore = userStores.map((storeId)=>{
             return Stores.findByIdAndDelete(storeId);
         });
@@ -86,7 +72,7 @@ router.delete('/:userId', (req,res)=>{
         
         Promise.all(resUser).then(() => console.log('좋아하는 가게 삭제 끝')).catch(err => console.log(err.message));
 
-        Users.deleteOne({id:userId}).then(()=>{
+        Users.deleteOne({id}).then(()=>{
             res.send('유저 삭제');
         })
 

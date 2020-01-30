@@ -11,13 +11,14 @@ router.get('/', (req,res)=>{
 //가게 등록
 router.post('/', (req,res)=> {
     console.log(req.body);
-    const {title, type, address, time, description, userId} = req.body;
+    const {title, type, address, time, description} = req.body;
+    const id = req.decoded.id;
     //address에서 latitude, longtitude 로 변환 필요
     const promise = Stores.create({title, type, location : { address }, time, description});;
     promise.then(async (store)=>{
        const storeId = store._id;
        //내가게등록
-       await Users.findOneAndUpdate({id:userId},{$push:{stores: storeId}});
+       await Users.findOneAndUpdate({id},{$push:{stores: storeId}});
        res.send(storeId);
     });
 });
@@ -86,12 +87,12 @@ router.patch('/:storeId/item/:itemIndex', (req,res)=>{
 //가게 삭제
 router.delete('/:storeId', (req,res)=> {
     const storeId = req.params.storeId;
-    const { userId } = req.body;
+    const id = req.decoded.id;
     
     Stores.findByIdAndDelete(storeId).then(()=>{res.send('가게삭제')}).catch((err)=>{console.log(err)});
 
     //내가게에서도 삭제
-    Users.findOneAndUpdate({id : userId}, {$pull :{stores : storeId}}).then(()=>{res.send('내가게 삭제')}).catch((err)=>{console.log(err)});
+    Users.findOneAndUpdate({id}, {$pull :{stores : storeId}}).then(()=>{res.send('내가게 삭제')}).catch((err)=>{console.log(err)});
 
     //내가좋아하는가게 - 사용자 삭제
     Users.updateMany({likes : {$in : storeId}},{$pull : {likes : storeId }}).then((store)=>{
