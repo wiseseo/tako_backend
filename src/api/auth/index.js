@@ -19,6 +19,17 @@ router.post('/signup', (req, res) => {
     });
 });
 
+router.get('/checkId', (req,res) => {
+    const { id } = req.body;
+
+    Users.find().then((users)=>{
+        const usersId = users.map((user)=>user.id).includes(id);
+        if(usersId) res.send('중복된 아이디 있음');
+        else res.send('사용가능한 아이디입니다');
+    }).catch((err)=>{
+        console.log(err);
+    })
+})
 
 router.use('/check', authMiddleware)
 router.get('/check', (req, res)=>{
@@ -31,20 +42,20 @@ router.get('/check', (req, res)=>{
 
 router.post('/login', (req,res)=>{
     //console.log(req.body);
-    const { userId, password } = req.body;
+    const { id, password } = req.body;
     const secret = req.app.get('jwt-secret');
 
     crypto.pbkdf2(password, 'iloveeunwoo', 108236, 64, 'sha256', (err, key)=>{
-        Users.findOne({$and : [{id:userId}, {password:key.toString('base64')}]}).then((user)=>{
+        Users.findOne({$and : [{id}, {password:key.toString('base64')}]}).then((user)=>{
             if(!user) {
-                res.send('login fail');
+                res.send('ID나 Password가 잘못되었습니다.');
             }
             else{
                 const p = new Promise((resolve, reject) => {
                     jwt.sign(
                         {
                             id: user.id,
-                            username: user.name,
+                            //username: user.name,
                             //admin: user.admin
                         }, 
                         secret, 

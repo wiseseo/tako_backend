@@ -8,6 +8,7 @@ router.use(express.json());
 router.get('/', (req,res)=>{
     res.send('store page');
 });
+
 //가게 등록
 router.post('/', (req,res)=> {
     console.log(req.body);
@@ -15,19 +16,21 @@ router.post('/', (req,res)=> {
     const id = req.decoded.id;
     //address에서 latitude, longtitude 로 변환 필요
     const promise = Stores.create({title, type, location : { address, latitude, longitude }, time, description});;
-    promise.then(async (store)=>{
+    promise.then((store)=>{
        const storeId = store._id;
        //내가게등록
-       await Users.findOneAndUpdate({id},{$push:{stores: storeId}});
-       res.send(storeId);
+       Users.findOneAndUpdate({id},{$push:{stores: storeId}},{new:true}).then((newuser)=>{
+            res.send(newuser);
+       })
     });
 });
+
 //메뉴 등록
 router.patch('/:storeId/menu', async (req,res) => {
     const storeId = req.params.storeId;
     const {menu, price, photo} = req.body;
-    await Stores.findByIdAndUpdate(storeId,{$push : {items : {menu, price, photo}}});
-    res.send('register menu');
+    const store = await Stores.findByIdAndUpdate(storeId,{$push : {items : {menu, price, photo}}},{new:true});
+    res.send(store);
 });
 
 //가게 거리에 따라서 보여주기
@@ -62,9 +65,8 @@ router.put('/:storeId', (req, res)=>{
     const {title, type, address, latitude, longitude, time, description } = req.body;
     const storeId = req.params.storeId;
 
-    Stores.findByIdAndUpdate(storeId, {$set: {title, type, location:{address, latitude, longitude },time, description}}, {returnNewDocument : true}).then((store)=>{
-        console.log(store);
-        res.send('가게 수정');
+    Stores.findByIdAndUpdate(storeId, {$set: {title, type, location:{address, latitude, longitude },time, description}}, {new : true}).then((store)=>{
+        res.send(store);
     }).catch((err)=>{
         console.log(err);
     })
@@ -79,8 +81,8 @@ router.patch('/:storeId/item/:itemIndex', (req,res)=>{
     Stores.findById(storeId).then(async (store)=>{
         store.items[itemIndex] = { menu ,price, photo};
         console.log(store.items);
-        await Stores.findByIdAndUpdate(storeId, {$set : {items : store.items}});
-        res.send('메뉴 수정');
+        const menuAddedStore = await Stores.findByIdAndUpdate(storeId, {$set : {items : store.items}});
+        res.send(menuAddedStore);
     })
 });
 
