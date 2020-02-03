@@ -11,10 +11,10 @@ router.get('/', (req,res)=>{
 
 //가게 등록
 router.post('/', (req,res)=> {
-    const {title, type, location:{address, latitude, longitude}, time, description} = req.body;
+    const {title, type, location, time, description} = req.body;
     const id = req.decoded.id;
     //address에서 latitude, longtitude 로 변환 필요
-    const promise = Stores.create({title, type, location : { address, latitude, longitude }, time, description});;
+    const promise = Stores.create({title, type, location , time, description});;
     promise.then((store)=>{
        const storeId = store._id;
        //내가게등록
@@ -59,10 +59,10 @@ router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta/:type', (req,re
 
 //가게 수정
 router.put('/:storeId', (req, res)=>{
-    const {title, type, address, latitude, longitude, time, description } = req.body;
+    const {title, type, location, time, description } = req.body;
     const storeId = req.params.storeId;
 
-    Stores.findByIdAndUpdate(storeId, {$set: {title, type, location:{address, latitude, longitude },time, description}}, {new : true}).then((store)=>{
+    Stores.findByIdAndUpdate(storeId, {$set: {title, type, location,time, description}}, {new : true}).then((store)=>{
         res.send(store);
     }).catch((err)=>{
         console.log(err);
