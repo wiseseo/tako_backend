@@ -75,29 +75,27 @@ router.delete('/', (req,res)=>{
     Users.findOne({id}).then( (user)=>{
         
         const userStores = user.stores;
-        //바꿔야함!!!!!!!!!!!!!!!!!!!!!!모든작업이 끝나야 res.send를 호출해야해요
-        const resStore = userStores.map((storeId)=>{
-            return Stores.findByIdAndDelete(storeId);
-        });
-
-        Promise.all(resStore).then(() => {
-            console.log('내가게 삭제끝');
-
-            const resUser = userStores.map((storeId)=>{
-                return  Users.updateMany({likes : {$in : storeId}},{$pull : {likes : storeId }});
-            })
-            
-            Promise.all(resUser).then(() => {
-                console.log('좋아하는 가게 삭제 끝');
-
-                Users.deleteOne({id}).then(()=>{
-                    res.send('유저 삭제');
-                }).catch(err => console.log(err));
-
-            }).catch(err => console.log(err.message));
-
-        }).catch(err => console.log(err.message));
+   
+        const resStore = userStores.map((storeId)=>
+            Stores.findByIdAndDelete(storeId)
+        );
         
+        const resUser = userStores.map((storeId)=>
+            Users.updateMany({likes : {$in : storeId}},{$pull : {likes : storeId }})
+        )
+        Users.deleteOne({id}).then(()=>{
+            console.log('유저 삭제끝');
+            return Promise.all(resStore);
+        }).then(() => {
+            console.log('내가게 삭제끝');
+            return Promise.all(resUser);
+        }).then(() => {
+            console.log('좋아하는 가게 삭제 끝');
+            res.send('유저 삭제');
+        }).catch(err => {console.log(err.message); res.send('에러')});
+
+        
+
     }).catch((err)=>{
         console.log(err);
     })
