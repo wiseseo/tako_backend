@@ -22,9 +22,8 @@ router.post('/signup', (req, res) => {
 router.get('/checkId', (req,res) => {
     const { id } = req.body;
 
-    Users.find().then((users)=>{
-        const usersId = users.map((user)=>user.id).includes(id);
-        if(usersId) res.send('중복된 아이디 있음');
+    Users.findOne({id}).then((user)=>{
+        if(user) res.send('중복된 아이디 있음');
         else res.send('사용가능한 아이디입니다');
     }).catch((err)=>{
         console.log(err);
