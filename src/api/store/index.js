@@ -11,7 +11,6 @@ router.get('/', (req,res)=>{
 
 //가게 등록
 router.post('/', (req,res)=> {
-    console.log(req.body);
     const {title, type, address, latitude, longitude, time, description} = req.body;
     const id = req.decoded.id;
     //address에서 latitude, longtitude 로 변환 필요
@@ -39,7 +38,7 @@ router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta', (req,res)=>{
     const userlongitude = parseFloat(req.params.longitude);
     const latitudeDelta = parseFloat(req.params.latitudeDelta);
     const longitudeDelta = parseFloat(req.params.longitudeDelta);
-    //console.log(typeof userlatitude);
+
     Stores.find({$and : [{'location.latitude' : { $lte : userlatitude + latitudeDelta}} , {'location.latitude' : { $gte : userlatitude - latitudeDelta}}, {'location.longitude' : { $lte : userlongitude + longitudeDelta}} , {'location.longitude' : { $gte : userlongitude - longitudeDelta}} ]}).then((stores)=>{
         res.send(stores);
     });    
@@ -107,7 +106,6 @@ router.delete('/:storeId', (req,res)=> {
 router.delete('/:storeId/item/:itemIndex', (req,res)=> {
     const storeId = req.params.storeId;
     const itemIndex = parseInt(req.params.itemIndex);
-    //const { userId } = req.body;
     
     Stores.findById(storeId).then(async (store)=>{
         store.items.splice(itemIndex,1);

@@ -41,7 +41,6 @@ router.get('/check', (req, res)=>{
 
 
 router.post('/login', (req,res)=>{
-    //console.log(req.body);
     const { id, password } = req.body;
     const secret = req.app.get('jwt-secret');
 
@@ -53,9 +52,7 @@ router.post('/login', (req,res)=>{
                 else {
                     jwt.sign(
                         {
-                            id: user.id,
-                            //username: user.name,
-                            //admin: user.admin
+                            id: user.id
                         }, 
                         secret, 
                         {
@@ -74,45 +71,6 @@ router.post('/login', (req,res)=>{
             })
         }
     })
-
-/*
-    crypto.pbkdf2(password, 'iloveeunwoo', 108236, 64, 'sha256', (err, key)=>{
-        Users.findOne({$and : [{id}, {password:key.toString('base64')}]}).then((user)=>{
-            if(!user) {
-                res.send('ID나 Password가 잘못되었습니다.');
-            }
-            else{
-                const p = new Promise((resolve, reject) => {
-                    jwt.sign(
-                        {
-                            id: user.id,
-                            //username: user.name,
-                            //admin: user.admin
-                        }, 
-                        secret, 
-                        {
-                            expiresIn: '7d',
-                            issuer: 'tako.com',
-                            subject: 'userInfo'
-                        }, (err, token) => {
-                            if (err) reject(err)
-                            resolve(token) 
-                        })
-                })
-                return p;
-            }
-        }).then((token)=>{
-            res.json({
-                message: 'logged in successfully',
-                token
-            });
-        })
-        .catch((err)=>{
-            console.log(err);
-        })
-    });
-    */
-
 });
 
 
