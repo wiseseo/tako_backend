@@ -11,7 +11,7 @@ router.get('/', (req,res)=>{
 
 //가게 등록
 router.post('/', (req,res)=> {
-    const {title, type, address, latitude, longitude, time, description} = req.body;
+    const {title, type, location:{address, latitude, longitude}, time, description} = req.body;
     const id = req.decoded.id;
     //address에서 latitude, longtitude 로 변환 필요
     const promise = Stores.create({title, type, location : { address, latitude, longitude }, time, description});;
@@ -52,11 +52,9 @@ router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta/:type', (req,re
     const longitudeDelta = parseFloat(req.params.longitudeDelta);
     const type = req.params.type;
 
-    console.log(typeof type, type);
-    Stores.find({$and : [{'location.latitude' : { $lte : latitude + latitudeDelta}} , {'location.latitude' : { $gte : latitude - latitudeDelta}}, {'location.longitude' : { $lte : longitude + longitudeDelta}} , {'location.longitude' : { $gte : longitude - longitudeDelta}} ]}).then((stores)=>{
-        const filteredStore = stores.filter(store => store.type.includes(type));
-        res.send(filteredStore);
-    });    
+    Stores.find({$and : [{type},{'location.latitude' : { $lte : latitude + latitudeDelta}} , {'location.latitude' : { $gte : latitude - latitudeDelta}}, {'location.longitude' : { $lte : longitude + longitudeDelta}} , {'location.longitude' : { $gte : longitude - longitudeDelta}} ]}).then((stores)=>{
+        res.send(stores)
+    }).catch(err => res.statusCode(404));    
 });
 
 //가게 수정
