@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Stores = require('../../models/stores');
 const Users = require('../../models/users');
+const Types = require('../../models/types');
 
 router.use(express.json());
 
@@ -25,11 +26,12 @@ router.post('/', (req,res)=> {
 });
 
 //메뉴 등록
-router.patch('/:storeId/menu', async (req,res) => {
+router.patch('/:storeId/menu', (req,res) => {
     const storeId = req.params.storeId;
     const {menu, price, photo} = req.body;
-    const store = await Stores.findByIdAndUpdate(storeId,{$push : {items : {menu, price, photo}}},{new:true});
-    res.send(store);
+    Stores.findByIdAndUpdate(storeId,{$push : {items : {menu, price, photo}}},{new:true}).then((store)=>{
+        res.send(store);
+    })
 });
 
 //가게 거리에 따라서 보여주기
@@ -44,15 +46,20 @@ router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta', (req,res)=>{
     });    
 });
 
+async function getTypeByNumber(number) {
+    const {name} = await Types.findOne({number});
+    return name;
+}
+
 //가게 거리+type 따라서 보여주기
-router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta/:type', (req,res)=>{
+router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta/:typeNumber', async (req,res)=>{
     const latitude = parseFloat(req.params.latitude);
     const longitude = parseFloat(req.params.longitude);
     const latitudeDelta = parseFloat(req.params.latitudeDelta);
     const longitudeDelta = parseFloat(req.params.longitudeDelta);
-    const type = req.params.type;
+    const name = await getTypeByNumber(parseInt(req.params.typeNumber));
 
-    Stores.find({$and : [{type},{'location.latitude' : { $lte : latitude + latitudeDelta}} , {'location.latitude' : { $gte : latitude - latitudeDelta}}, {'location.longitude' : { $lte : longitude + longitudeDelta}} , {'location.longitude' : { $gte : longitude - longitudeDelta}} ]}).then((stores)=>{
+    Stores.find({$and : [{type:name},{'location.latitude' : { $lte : latitude + latitudeDelta}} , {'location.latitude' : { $gte : latitude - latitudeDelta}}, {'location.longitude' : { $lte : longitude + longitudeDelta}} , {'location.longitude' : { $gte : longitude - longitudeDelta}} ]}).then((stores)=>{
         res.send(stores)
     }).catch(err => res.statusCode(404));    
 });
@@ -77,7 +84,6 @@ router.patch('/:storeId/item/:itemIndex', (req,res)=>{
 
     Stores.findById(storeId).then(async (store)=>{
         store.items[itemIndex] = { menu ,price, photo};
-        console.log(store.items);
         const menuAddedStore = await Stores.findByIdAndUpdate(storeId, {$set : {items : store.items}});
         res.send(menuAddedStore);
     })
@@ -95,7 +101,6 @@ router.delete('/:storeId', (req,res)=> {
 
     //내가좋아하는가게 - 사용자 삭제
     Users.updateMany({likes : {$in : storeId}},{$pull : {likes : storeId }}).then((store)=>{
-        console.log(store);
         res.send('내가좋아하는가게 삭제');
     })
 });

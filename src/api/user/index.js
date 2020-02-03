@@ -15,7 +15,10 @@ router.get('/like', (req, res)=>{
     const id = req.decoded.id;
     Users.findOne({id}).then((user)=>{
         const userLike = user.likes;
-        res.send(userLike);
+        const userlikeToStore = userLike.map(element => Stores.findById(element));
+        Promise.all(userlikeToStore).then((stores)=>{
+            res.send(stores)
+        });
     }).catch((err)=>{
         console.log(err);
     })
@@ -38,7 +41,10 @@ router.get('/store', (req, res)=>{
     const id = req.decoded.id;
     Users.findOne({id}).then((user)=>{
         const userStore = user.stores;
-        res.send(userStore);
+        const userstoreToStore = userStore.map(element => Stores.findById(element));
+        Promise.all(userstoreToStore).then((stores)=>{
+            res.send(stores);
+        })
     }).catch((err)=>{
         console.log(err);
     })
@@ -64,7 +70,6 @@ router.delete('/like/:storeId', (req, res)=>{
     const id = req.decoded.id;
     const storeId = req.params.storeId;
     Users.findOneAndUpdate({id},{$pull : {likes : storeId}},{new: true}).then((storeLike)=>{
-        console.log(storeLike);
         res.send('좋아하는가게삭제');
     }).catch((e)=>{console.log(e)});
 });

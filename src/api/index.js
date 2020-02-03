@@ -8,7 +8,7 @@ router.use('/user', require('./user'));
 router.use('/store', authMiddleware)
 router.use('/store', require('./store'));
 router.use('/auth', require('./auth'));
-
+router.use('/type', require('./type'));
 router.get('/', (req,res)=>{
     res.send('api page');
 });
