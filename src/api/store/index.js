@@ -34,26 +34,26 @@ router.patch('/:storeId/menu', async (req,res) => {
 
 //가게 거리에 따라서 보여주기
 router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta', (req,res)=>{
-    const userlatitude = parseFloat(req.params.latitude);
-    const userlongitude = parseFloat(req.params.longitude);
+    const latitude = parseFloat(req.params.latitude);
+    const longitude = parseFloat(req.params.longitude);
     const latitudeDelta = parseFloat(req.params.latitudeDelta);
     const longitudeDelta = parseFloat(req.params.longitudeDelta);
 
-    Stores.find({$and : [{'location.latitude' : { $lte : userlatitude + latitudeDelta}} , {'location.latitude' : { $gte : userlatitude - latitudeDelta}}, {'location.longitude' : { $lte : userlongitude + longitudeDelta}} , {'location.longitude' : { $gte : userlongitude - longitudeDelta}} ]}).then((stores)=>{
+    Stores.find({$and : [{'location.latitude' : { $lte : latitude + latitudeDelta}} , {'location.latitude' : { $gte : latitude - latitudeDelta}}, {'location.longitude' : { $lte : longitude + longitudeDelta}} , {'location.longitude' : { $gte : longitude - longitudeDelta}} ]}).then((stores)=>{
         res.send(stores);
     });    
 });
 
 //가게 거리+type 따라서 보여주기
 router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta/:type', (req,res)=>{
-    const userlatitude = parseFloat(req.params.latitude);
-    const userlongitude = parseFloat(req.params.longitude);
+    const latitude = parseFloat(req.params.latitude);
+    const longitude = parseFloat(req.params.longitude);
     const latitudeDelta = parseFloat(req.params.latitudeDelta);
     const longitudeDelta = parseFloat(req.params.longitudeDelta);
     const type = req.params.type;
 
     console.log(typeof type, type);
-    Stores.find({$and : [{'location.latitude' : { $lte : userlatitude + latitudeDelta}} , {'location.latitude' : { $gte : userlatitude - latitudeDelta}}, {'location.longitude' : { $lte : userlongitude + longitudeDelta}} , {'location.longitude' : { $gte : userlongitude - longitudeDelta}} ]}).then((stores)=>{
+    Stores.find({$and : [{'location.latitude' : { $lte : latitude + latitudeDelta}} , {'location.latitude' : { $gte : latitude - latitudeDelta}}, {'location.longitude' : { $lte : longitude + longitudeDelta}} , {'location.longitude' : { $gte : longitude - longitudeDelta}} ]}).then((stores)=>{
         const filteredStore = stores.filter(store => store.type.includes(type));
         res.send(filteredStore);
     });    
