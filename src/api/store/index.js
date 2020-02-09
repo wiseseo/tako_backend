@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
 const Stores = require('../../models/stores');
 const Users = require('../../models/users');
 const Types = require('../../models/types');
@@ -10,12 +12,37 @@ router.get('/', (req,res)=>{
     res.send('store page');
 });
 
+const uploadThumnail = multer({
+    storage: multer.diskStorage({
+      destination: function (req, file, cb) {
+        cb(null, 'public/thumnail/');
+      },
+      filename: function (req, file, cb) {
+        cb(null, new Date().valueOf() + path.extname(file.originalname));
+      }
+    }),
+});
+
+const uploadItem = multer({
+    storage: multer.diskStorage({
+      destination: function (req, file, cb) {
+        cb(null, 'public/item/');
+      },
+      filename: function (req, file, cb) {
+        cb(null, new Date().valueOf() + path.extname(file.originalname));
+      }
+    }),
+});
+
 //가게 등록
-router.post('/', (req,res)=> {
+router.post('/', uploadThumnail.single('img'),(req,res)=> {
     const {title, type, location, time, description} = req.body;
     const id = req.decoded.id;
+    console.log(req.file);
+    console.log(__dirname);
+    const thumnail = req.file.path;
     //address에서 latitude, longtitude 로 변환 필요
-    const promise = Stores.create({title, type, location , time, description});;
+    const promise = Stores.create({title, type, location , time, description, thumnail});;
     promise.then((store)=>{
        const storeId = store._id;
        //내가게등록
@@ -23,12 +50,14 @@ router.post('/', (req,res)=> {
             res.send(newuser);
        })
     });
+    
 });
 
 //메뉴 등록
-router.patch('/:storeId/menu', (req,res) => {
+router.patch('/:storeId/menu',uploadItem.single('img'), (req,res) => {
     const storeId = req.params.storeId;
-    const {menu, price, photo} = req.body;
+    const {menu, price} = req.body;
+    const photo = req.file.path;
     Stores.findByIdAndUpdate(storeId,{$push : {items : {menu, price, photo}}},{new:true}).then((store)=>{
         res.send(store);
     })
@@ -65,11 +94,12 @@ router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta/:typeNumber', a
 });
 
 //가게 수정
-router.put('/:storeId', (req, res)=>{
+router.put('/:storeId', uploadThumnail.single('img'), (req, res)=>{
     const {title, type, location, time, description } = req.body;
     const storeId = req.params.storeId;
+    const thumnail = req.file.path;
 
-    Stores.findByIdAndUpdate(storeId, {$set: {title, type, location,time, description}}, {new : true}).then((store)=>{
+    Stores.findByIdAndUpdate(storeId, {$set: {title, type, location,time, description, thumnail }}, {new : true}).then((store)=>{
         res.send(store);
     }).catch((err)=>{
         console.log(err);
@@ -77,14 +107,15 @@ router.put('/:storeId', (req, res)=>{
 });
 
 //메뉴 수정
-router.patch('/:storeId/item/:itemIndex', (req,res)=>{
+router.patch('/:storeId/item/:itemIndex', uploadItem.single('img'), (req,res)=>{
     const storeId = req.params.storeId;
     const itemIndex = parseInt(req.params.itemIndex);
-    const { menu, price, photo } = req.body;
+    const { menu, price} = req.body;
+    const photo = req.file.path;
 
     Stores.findById(storeId).then(async (store)=>{
         store.items[itemIndex] = { menu ,price, photo};
-        const menuAddedStore = await Stores.findByIdAndUpdate(storeId, {$set : {items : store.items}});
+        const menuAddedStore = await Stores.findByIdAndUpdate(storeId, {$set : {items : store.items}}, {new : true});
         res.send(menuAddedStore);
     })
 });

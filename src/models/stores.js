@@ -14,7 +14,8 @@ const Stores = new Schema({
         type: Array,
         default : []
     },
-    description : String
+    description : String,
+    thumnail: String
 })
 
 module.exports = mongoose.model('Stores', Stores);
