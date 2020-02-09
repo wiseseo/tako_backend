@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const multer = require('multer');
 const path = require('path');
+const uuid4 = require('uuid4');
 const Stores = require('../../models/stores');
 const Users = require('../../models/users');
 const Types = require('../../models/types');
@@ -18,18 +19,18 @@ const uploadThumbnail = multer({
         cb(null, 'public/thumbnail/');
       },
       filename: function (req, file, cb) {
-        cb(null, new Date().valueOf() + path.extname(file.originalname));
-      }
-    }),
+        cb(null, uuid4() + path.extname(file.originalname));
+    }
+}),
 });
 
 const uploadItem = multer({
     storage: multer.diskStorage({
-      destination: function (req, file, cb) {
-        cb(null, 'public/item/');
-      },
-      filename: function (req, file, cb) {
-        cb(null, new Date().valueOf() + path.extname(file.originalname));
+        destination: function (req, file, cb) {
+            cb(null, 'public/item/');
+        },
+        filename: function (req, file, cb) {
+            cb(null, uuid4() + path.extname(file.originalname));
       }
     }),
 });
