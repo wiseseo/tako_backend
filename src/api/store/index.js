@@ -12,10 +12,10 @@ router.get('/', (req,res)=>{
     res.send('store page');
 });
 
-const uploadThumnail = multer({
+const uploadThumbnail = multer({
     storage: multer.diskStorage({
       destination: function (req, file, cb) {
-        cb(null, 'public/thumnail/');
+        cb(null, 'public/thumbnail/');
       },
       filename: function (req, file, cb) {
         cb(null, new Date().valueOf() + path.extname(file.originalname));
@@ -35,14 +35,14 @@ const uploadItem = multer({
 });
 
 //가게 등록
-router.post('/', uploadThumnail.single('img'),(req,res)=> {
+router.post('/',uploadThumbnail.single('img'),(req,res)=> {
     const {title, type, location, time, description} = req.body;
     const id = req.decoded.id;
     console.log(req.file);
     console.log(__dirname);
-    const thumnail = req.file.path;
+    const thumbnail = req.file.filename;
     //address에서 latitude, longtitude 로 변환 필요
-    const promise = Stores.create({title, type, location , time, description, thumnail});;
+    const promise = Stores.create({title, type, location , time, description, thumbnail});;
     promise.then((store)=>{
        const storeId = store._id;
        //내가게등록
@@ -57,7 +57,7 @@ router.post('/', uploadThumnail.single('img'),(req,res)=> {
 router.patch('/:storeId/menu',uploadItem.single('img'), (req,res) => {
     const storeId = req.params.storeId;
     const {menu, price} = req.body;
-    const photo = req.file.path;
+    const photo = req.file.filename;
     Stores.findByIdAndUpdate(storeId,{$push : {items : {menu, price, photo}}},{new:true}).then((store)=>{
         res.send(store);
     })
@@ -94,12 +94,12 @@ router.get('/:latitude/:longitude/:latitudeDelta/:longitudeDelta/:typeNumber', a
 });
 
 //가게 수정
-router.put('/:storeId', uploadThumnail.single('img'), (req, res)=>{
+router.put('/:storeId', uploadThumbnail.single('img'), (req, res)=>{
     const {title, type, location, time, description } = req.body;
     const storeId = req.params.storeId;
-    const thumnail = req.file.path;
+    const thumbnail = req.file.filename;
 
-    Stores.findByIdAndUpdate(storeId, {$set: {title, type, location,time, description, thumnail }}, {new : true}).then((store)=>{
+    Stores.findByIdAndUpdate(storeId, {$set: {title, type, location,time, description, thumbnail }}, {new : true}).then((store)=>{
         res.send(store);
     }).catch((err)=>{
         console.log(err);
@@ -111,7 +111,7 @@ router.patch('/:storeId/item/:itemIndex', uploadItem.single('img'), (req,res)=>{
     const storeId = req.params.storeId;
     const itemIndex = parseInt(req.params.itemIndex);
     const { menu, price} = req.body;
-    const photo = req.file.path;
+    const photo = req.file.filename;
 
     Stores.findById(storeId).then(async (store)=>{
         store.items[itemIndex] = { menu ,price, photo};
