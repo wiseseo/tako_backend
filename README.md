@@ -1,5 +1,9 @@
 # takoyaki_api
 
+## takoyaki frontend code
+[바로가기](https://github.com/wiseseo/tako_frontend)
+<br/>
+
 ## /api/auth
 |기능|http method|uri|req_body|req_params/decodes|
 |:---:|:---:|:---:|:---:|:---:|
